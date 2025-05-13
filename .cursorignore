@@ -1,0 +1,8 @@
+# Cursor ignore file
+# Files that should be ignored by Cursor
+# By default, let Cursor access all files
+
+# Uncomment lines below to ignore specific patterns
+# node_modules
+# dist
+# *.lock 

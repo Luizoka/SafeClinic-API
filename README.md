@@ -136,4 +136,5 @@ Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para d
 
 ## Contato
 
-Luiz Lopes - luizlopes@exemplo.com 
+Luiz Lopes - luizgalopes01@gmail.com
+Sandra Remédios - Srocha2290@gmail.com 

@@ -210,4 +210,40 @@ export class ReceptionistService {
       throw error;
     }
   }
-} 
+
+  async findAll(page: number = 1, limit: number = 10) {
+    try {
+      const [receptionists, total] = await receptionistRepository.findAndCount({
+        relations: ['user'],
+        skip: (page - 1) * limit,
+        take: limit,
+        order: { created_at: 'DESC' }
+      });
+
+      // Retornar dados sem a senha
+      const data = receptionists.map(r => {
+        const { password_hash, ...userWithoutPassword } = r.user;
+        return {
+          ...userWithoutPassword,
+          receptionist: {
+            id: r.id,
+            work_shift: r.work_shift
+          }
+        };
+      });
+
+      return {
+        data,
+        metadata: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
+    } catch (error) {
+      logger.error('Erro ao listar recepcionistas:', { error });
+      throw new Error('Erro ao buscar recepcionistas');
+    }
+  }
+}

@@ -44,15 +44,11 @@ export class ReceptionistController {
         return res.status(403).json({ message: 'Acesso negado' });
       }
 
-      // Placeholder - implementar serviço de recepcionista
-      return res.json({
-        data: [],
-        metadata: {
-          total: 0,
-          page: 1,
-          limit: 10
-        }
-      });
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      const result = await receptionistService.findAll(page, limit);
+      return res.json(result);
     } catch (error) {
       logger.error('Erro ao listar recepcionistas:', { error });
       return res.status(500).json({ message: 'Erro ao buscar recepcionistas' });
@@ -229,4 +225,4 @@ export class ReceptionistController {
       return res.status(500).json({ message: 'Erro ao buscar recepcionista' });
     }
   }
-} 
+}

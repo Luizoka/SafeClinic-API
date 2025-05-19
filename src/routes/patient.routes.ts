@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { PatientController } from '../controllers/patient.controller';
+import { authenticate } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validation.middleware';
 import { patientSchema } from '../utils/validators';
 
@@ -13,9 +14,12 @@ const patientController = new PatientController();
  *   description: Gerenciamento de pacientes
  */
 
-// Rotas públicas
-patientRouter.post('/register', validate(patientSchema.create), patientController.create);
+// Cadastro de paciente (público)
 patientRouter.post('/', validate(patientSchema.create), patientController.create);
+
+// Rotas protegidas
+patientRouter.use(authenticate);
+
 patientRouter.get('/', patientController.findAll);
 patientRouter.get('/:id', patientController.findById);
 patientRouter.put('/:id', validate(patientSchema.update), patientController.update);

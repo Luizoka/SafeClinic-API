@@ -2,6 +2,10 @@ import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
 import logger from '../utils/logger';
+import path from 'path';
+import { User } from '../models/user.entity';
+import { Receptionist } from '../models/receptionist.entity';
+import { Doctor } from '../models/doctor.entity';
 
 dotenv.config();
 
@@ -19,7 +23,12 @@ const getDataSourceConfig = () => {
       synchronize: process.env.DB_SYNC === 'true',
       // Mostra apenas erros do TypeORM
       logging: 'error',
-      entities: [__dirname + '/../models/*.entity{.ts,.js}'],
+      entities: [
+        User,
+        Receptionist,
+        Doctor,
+        path.resolve(__dirname, '../models/**/*.entity.{ts,js}')
+      ],
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       subscribers: [__dirname + '/subscribers/*{.ts,.js}']
     };
@@ -37,7 +46,12 @@ const getDataSourceConfig = () => {
     synchronize: process.env.DB_SYNC === 'true',
     // Mostra apenas erros do TypeORM
     logging: 'error',
-    entities: [__dirname + '/../models/*.entity{.ts,.js}'],
+    entities: [
+      User,
+      Receptionist,
+      Doctor,
+      path.resolve(__dirname, '../models/**/*.entity.{ts,js}')
+    ],
     migrations: [__dirname + '/migrations/*{.ts,.js}'],
     subscribers: [__dirname + '/subscribers/*{.ts,.js}']
   };

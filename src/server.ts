@@ -16,6 +16,8 @@ import patientRouter from './routes/patient.routes';
 import doctorRouter from './routes/doctor.routes';
 import receptionistRouter from './routes/receptionist.routes';
 import appointmentRouter from './routes/appointment.routes';
+import scheduleRouter from './routes/schedule.routes';
+import notificationRouter from './routes/notification.routes';
 
 // Configuração das variáveis de ambiente
 dotenv.config();
@@ -35,13 +37,8 @@ app.use(requestLogger);
 
 // Configuração de rate limit
 const limiter = rateLimit({
-  windowMs: (parseInt(process.env.RATE_LIMIT_WINDOW || '15') * 60 * 1000), // 15 minutos por padrão
-  max: parseInt(process.env.RATE_LIMIT_MAX || '100'), // 100 requisições por janela por padrão
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    message: 'Muitas requisições deste IP. Por favor, tente novamente mais tarde.'
-  }
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW || '15') * 60 * 1000,
+  max: parseInt(process.env.RATE_LIMIT_MAX || '100')
 });
 
 app.use(limiter);
@@ -60,6 +57,8 @@ app.use(`${apiPrefix}/patients`, patientRouter);
 app.use(`${apiPrefix}/doctors`, doctorRouter);
 app.use(`${apiPrefix}/receptionists`, receptionistRouter);
 app.use(`${apiPrefix}/appointments`, appointmentRouter);
+app.use(`${apiPrefix}/schedules`, scheduleRouter);
+app.use(`${apiPrefix}/notifications`, notificationRouter);
 
 // Middleware para tratar erros 404
 app.use((req, res) => {
@@ -81,8 +80,7 @@ const startServer = async () => {
     // Iniciar o servidor
     app.listen(port, () => {
       logger.info(`Servidor rodando na porta ${port}`);
-      console.log(`Servidor rodando na porta ${port}`);
-      console.log(`Documentação da API: http://localhost:${port}/api-docs`);
+      logger.info(`Documentação da API: http://localhost:${port}/api-docs`);
     });
   } catch (error) {
     logger.error('Falha ao iniciar o servidor:', { error });
@@ -91,4 +89,4 @@ const startServer = async () => {
 };
 
 // Iniciar o servidor
-startServer(); 
+startServer();

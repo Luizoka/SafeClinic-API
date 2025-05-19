@@ -231,4 +231,37 @@ export const scheduleSchema = {
     }),
     reason: Joi.string().allow('', null)
   })
+};
+
+// Esquemas de validação para recepcionista
+export const receptionistSchema = {
+  create: Joi.object({
+    name: Joi.string().required().messages({
+      'string.empty': 'Nome é obrigatório',
+      'any.required': 'Nome é obrigatório'
+    }),
+    email: Joi.string().email().required().messages({
+      'string.email': 'Email inválido',
+      'string.empty': 'Email é obrigatório',
+      'any.required': 'Email é obrigatório'
+    }),
+    password: Joi.string().min(6).required().messages({
+      'string.min': 'Senha deve ter no mínimo 6 caracteres',
+      'string.empty': 'Senha é obrigatória',
+      'any.required': 'Senha é obrigatória'
+    }),
+    cpf: Joi.string().pattern(/^\d{11}$/).required().messages({
+      'string.pattern.base': 'CPF deve conter 11 dígitos numéricos',
+      'string.empty': 'CPF é obrigatório',
+      'any.required': 'CPF é obrigatório'
+    }),
+    phone: Joi.string().allow('', null).messages({
+      'string.base': 'Telefone deve ser uma string'
+    }),
+    work_shift: Joi.string().valid('morning', 'afternoon', 'night').required().messages({
+      'any.only': 'Turno de trabalho deve ser morning, afternoon ou night',
+      'string.empty': 'Turno de trabalho é obrigatório',
+      'any.required': 'Turno de trabalho é obrigatório'
+    })
+  })
 }; 

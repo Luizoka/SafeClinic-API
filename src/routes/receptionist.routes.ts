@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ReceptionistController } from '../controllers/receptionist.controller';
-import { authenticate, authorize } from '../middlewares/auth.middleware';
-import { UserRole } from '../models/user.entity';
+import { validate } from '../middlewares/validation.middleware';
+import { receptionistSchema } from '../utils/validators';
 
 const receptionistRouter = Router();
 const receptionistController = new ReceptionistController();
@@ -13,12 +13,9 @@ const receptionistController = new ReceptionistController();
  *   description: Gerenciamento de recepcionistas
  */
 
-// Middleware para autenticação em todas as rotas
-receptionistRouter.use(authenticate);
-
-// Rotas de recepcionistas
-receptionistRouter.get('/', authorize([UserRole.RECEPTIONIST]), receptionistController.findAll);
-receptionistRouter.get('/:id', authorize([UserRole.RECEPTIONIST]), receptionistController.findById);
-receptionistRouter.post('/', authorize([UserRole.RECEPTIONIST]), receptionistController.create);
+// Rotas públicas
+receptionistRouter.post('/register', validate(receptionistSchema.create), receptionistController.createFirstReceptionist);
+receptionistRouter.post('/', validate(receptionistSchema.create), receptionistController.create);
+receptionistRouter.get('/:id', receptionistController.findById);
 
 export default receptionistRouter; 

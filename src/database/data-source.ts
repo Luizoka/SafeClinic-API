@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
+import logger from '../utils/logger';
 
 dotenv.config();
 
@@ -8,6 +9,7 @@ dotenv.config();
 const getDataSourceConfig = () => {
   // Se DATABASE_URL estiver definido (para Railway)
   if (process.env.DATABASE_URL) {
+    logger.info('Usando DATABASE_URL para conexão');
     return {
       type: 'postgres',
       url: process.env.DATABASE_URL,
@@ -15,7 +17,8 @@ const getDataSourceConfig = () => {
         rejectUnauthorized: false
       },
       synchronize: process.env.DB_SYNC === 'true',
-      logging: process.env.DB_LOGGING === 'true',
+      // Mostra apenas erros do TypeORM
+      logging: 'error',
       entities: [__dirname + '/../models/*.entity{.ts,.js}'],
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       subscribers: [__dirname + '/subscribers/*{.ts,.js}']
@@ -23,6 +26,7 @@ const getDataSourceConfig = () => {
   }
 
   // Configuração padrão para desenvolvimento local
+  logger.info('Usando configuração local para conexão');
   return {
     type: 'postgres',
     host: process.env.DB_HOST || 'localhost',
@@ -31,7 +35,8 @@ const getDataSourceConfig = () => {
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_DATABASE || 'safeclinic',
     synchronize: process.env.DB_SYNC === 'true',
-    logging: process.env.DB_LOGGING === 'true',
+    // Mostra apenas erros do TypeORM
+    logging: 'error',
     entities: [__dirname + '/../models/*.entity{.ts,.js}'],
     migrations: [__dirname + '/migrations/*{.ts,.js}'],
     subscribers: [__dirname + '/subscribers/*{.ts,.js}']
@@ -43,10 +48,11 @@ export const AppDataSource = new DataSource(getDataSourceConfig() as any);
 // Função para inicializar a conexão com o banco de dados
 export const initializeDB = async (): Promise<void> => {
   try {
+    logger.info('Iniciando conexão com o banco de dados...');
     await AppDataSource.initialize();
-    console.log('Data Source has been initialized!');
+    logger.info('Conexão com o banco de dados estabelecida com sucesso!');
   } catch (error) {
-    console.error('Error during Data Source initialization:', error);
+    logger.error('Erro ao inicializar conexão com o banco de dados:', { error });
     throw error;
   }
-}; 
+};

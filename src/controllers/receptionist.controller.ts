@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
+import { ReceptionistService } from '../services/receptionist.service';
 import logger from '../utils/logger';
 import { UserRole } from '../models/user.entity';
+
+const receptionistService = new ReceptionistService();
 
 export class ReceptionistController {
   /**
@@ -58,6 +61,134 @@ export class ReceptionistController {
 
   /**
    * @swagger
+   * /receptionists/register:
+   *   post:
+   *     tags: [Receptionists]
+   *     summary: Cria o primeiro recepcionista do sistema
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - name
+   *               - email
+   *               - password
+   *               - cpf
+   *               - work_shift
+   *             properties:
+   *               name:
+   *                 type: string
+   *               email:
+   *                 type: string
+   *                 format: email
+   *               password:
+   *                 type: string
+   *                 format: password
+   *               cpf:
+   *                 type: string
+   *               phone:
+   *                 type: string
+   *               work_shift:
+   *                 type: string
+   *                 enum: [morning, afternoon, night]
+   *     responses:
+   *       201:
+   *         description: Recepcionista criado com sucesso
+   *       400:
+   *         description: Dados inválidos
+   *       409:
+   *         description: Email ou CPF já cadastrados
+   *       500:
+   *         description: Erro no servidor
+   */
+  async createFirstReceptionist(req: Request, res: Response) {
+    try {
+      const receptionist = await receptionistService.createFirstReceptionist(req.body);
+      return res.status(201).json(receptionist);
+    } catch (error: any) {
+      logger.error('Erro ao criar primeiro recepcionista:', { error });
+      
+      if (error.message === 'Email ou CPF já cadastrados') {
+        return res.status(409).json({ message: error.message });
+      }
+      
+      if (error.message === 'Já existe um recepcionista cadastrado no sistema') {
+        return res.status(409).json({ message: error.message });
+      }
+      
+      return res.status(500).json({ message: 'Erro ao criar recepcionista' });
+    }
+  }
+
+  /**
+   * @swagger
+   * /receptionists:
+   *   post:
+   *     tags: [Receptionists]
+   *     summary: Cria um novo recepcionista (apenas recepcionistas)
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - name
+   *               - email
+   *               - password
+   *               - cpf
+   *               - work_shift
+   *             properties:
+   *               name:
+   *                 type: string
+   *               email:
+   *                 type: string
+   *                 format: email
+   *               password:
+   *                 type: string
+   *                 format: password
+   *               cpf:
+   *                 type: string
+   *               phone:
+   *                 type: string
+   *               work_shift:
+   *                 type: string
+   *                 enum: [morning, afternoon, night]
+   *     responses:
+   *       201:
+   *         description: Recepcionista criado com sucesso
+   *       400:
+   *         description: Dados inválidos
+   *       401:
+   *         description: Não autorizado
+   *       403:
+   *         description: Acesso proibido
+   *       409:
+   *         description: Email ou CPF já cadastrados
+   *       500:
+   *         description: Erro no servidor
+   */
+  async create(req: Request, res: Response) {
+    try {
+      const receptionist = await receptionistService.create(req.body);
+      return res.status(201).json(receptionist);
+    } catch (error: any) {
+      logger.error('Erro ao criar recepcionista:', { error });
+      
+      if (error.message === 'Email ou CPF já cadastrados') {
+        return res.status(409).json({ message: error.message });
+      }
+      
+      return res.status(500).json({ message: 'Erro ao criar recepcionista' });
+    }
+  }
+
+  /**
+   * @swagger
    * /receptionists/{id}:
    *   get:
    *     tags: [Receptionists]
@@ -85,76 +216,17 @@ export class ReceptionistController {
    */
   async findById(req: Request, res: Response) {
     try {
-      // Apenas recepcionistas podem ver detalhes
-      if (req.user?.role !== UserRole.RECEPTIONIST) {
-        return res.status(403).json({ message: 'Acesso negado' });
+      const { id } = req.params;
+      const receptionist = await receptionistService.findById(id);
+      
+      if (!receptionist) {
+        return res.status(404).json({ message: 'Recepcionista não encontrado' });
       }
-
-      return res.status(404).json({ message: 'Recepcionista não encontrado' });
+      
+      return res.json(receptionist);
     } catch (error) {
       logger.error('Erro ao buscar recepcionista:', { error, id: req.params.id });
       return res.status(500).json({ message: 'Erro ao buscar recepcionista' });
-    }
-  }
-
-  /**
-   * @swagger
-   * /receptionists:
-   *   post:
-   *     tags: [Receptionists]
-   *     summary: Cria um novo recepcionista (apenas recepcionistas)
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - name
-   *               - email
-   *               - password
-   *               - cpf
-   *             properties:
-   *               name:
-   *                 type: string
-   *               email:
-   *                 type: string
-   *                 format: email
-   *               password:
-   *                 type: string
-   *                 format: password
-   *               cpf:
-   *                 type: string
-   *               phone:
-   *                 type: string
-   *     responses:
-   *       201:
-   *         description: Recepcionista criado com sucesso
-   *       400:
-   *         description: Dados inválidos
-   *       401:
-   *         description: Não autorizado
-   *       403:
-   *         description: Acesso proibido
-   *       409:
-   *         description: Email ou CPF já cadastrados
-   *       500:
-   *         description: Erro no servidor
-   */
-  async create(req: Request, res: Response) {
-    try {
-      // Apenas recepcionistas podem criar outros recepcionistas
-      if (req.user?.role !== UserRole.RECEPTIONIST) {
-        return res.status(403).json({ message: 'Acesso negado' });
-      }
-
-      // Placeholder - implementar serviço de recepcionista
-      return res.status(501).json({ message: 'Funcionalidade ainda não implementada' });
-    } catch (error) {
-      logger.error('Erro ao criar recepcionista:', { error });
-      return res.status(500).json({ message: 'Erro ao criar recepcionista' });
     }
   }
 } 

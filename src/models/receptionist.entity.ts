@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
 
 export enum WorkShift {
@@ -9,26 +9,19 @@ export enum WorkShift {
 
 @Entity('receptionists')
 export class Receptionist {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column()
+  @PrimaryColumn('uuid')
   user_id: string;
 
-  @Column({
-    type: 'enum',
-    enum: WorkShift
-  })
+  @Column({ type: 'enum', enum: WorkShift })
   work_shift: WorkShift;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
 
-  // Relacionamentos
-  @OneToOne(() => User, user => user.receptionist)
+  @OneToOne(() => User, user => user.receptionist, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
-} 
+}

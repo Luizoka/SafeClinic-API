@@ -6,6 +6,7 @@ import path from 'path';
 import { User } from '../models/user.entity';
 import { Receptionist } from '../models/receptionist.entity';
 import { Doctor } from '../models/doctor.entity';
+import { Speciality } from '../models/speciality.entity';
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ const getDataSourceConfig = () => {
         User,
         Receptionist,
         Doctor,
+        Speciality,
         path.resolve(__dirname, '../models/**/*.entity.{ts,js}')
       ],
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
@@ -50,6 +52,7 @@ const getDataSourceConfig = () => {
       User,
       Receptionist,
       Doctor,
+      Speciality,
       path.resolve(__dirname, '../models/**/*.entity.{ts,js}')
     ],
     migrations: [__dirname + '/migrations/*{.ts,.js}'],

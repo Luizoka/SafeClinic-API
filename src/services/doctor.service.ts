@@ -1,18 +1,20 @@
 import { AppDataSource } from '../database/data-source';
 import { Doctor } from '../models/doctor.entity';
 import { User, UserRole } from '../models/user.entity';
+import { Speciality } from '../models/speciality.entity';
 import bcrypt from 'bcryptjs';
 import logger, { auditLog } from '../utils/logger';
 
 const doctorRepository = AppDataSource.getRepository(Doctor);
 const userRepository = AppDataSource.getRepository(User);
+const specialityRepository = AppDataSource.getRepository(Speciality);
 
 export class DoctorService {
   // Buscar médico por ID
   async findById(id: string): Promise<Doctor | null> {
     try {
       const doctor = await doctorRepository.findOne({
-        where: { id },
+        where: { id: id },
         relations: ['user']
       });
       return doctor;
@@ -59,7 +61,7 @@ export class DoctorService {
     try {
       const [doctors, total] = await doctorRepository.findAndCount({
         where: {
-          speciality: speciality
+          speciality_id: speciality
         },
         relations: ['user'],
         skip: (page - 1) * limit,
@@ -87,7 +89,7 @@ export class DoctorService {
     cpf: string;
     phone?: string;
     crm: string;
-    speciality: string;
+    speciality_id: string;
     professional_statement?: string;
     consultation_duration?: number;
   }): Promise<Doctor> {
@@ -117,6 +119,12 @@ export class DoctorService {
           throw new Error('CRM já cadastrado');
         }
 
+        // Verificar se especialidade existe
+        const speciality = await specialityRepository.findOne({ where: { id: doctorData.speciality_id } });
+        if (!speciality) {
+          throw new Error('Especialidade não encontrada');
+        }
+
         // Criar usuário
         const passwordHash = await bcrypt.hash(doctorData.password, 10);
 
@@ -135,7 +143,7 @@ export class DoctorService {
         const newDoctor = queryRunner.manager.create(Doctor, {
           user_id: savedUser.id,
           crm: doctorData.crm,
-          speciality: doctorData.speciality,
+          speciality_id: doctorData.speciality_id,
           professional_statement: doctorData.professional_statement,
           consultation_duration: doctorData.consultation_duration || 30
         });
@@ -169,7 +177,7 @@ export class DoctorService {
   async update(id: string, doctorData: {
     name?: string;
     phone?: string;
-    speciality?: string;
+    speciality_id?: string;
     professional_statement?: string;
     consultation_duration?: number;
   }, userId: string): Promise<Doctor> {
@@ -202,7 +210,14 @@ export class DoctorService {
         // Atualizar dados do médico
         const doctorUpdateData: any = {};
         
-        if (doctorData.speciality) doctorUpdateData.speciality = doctorData.speciality;
+        if (doctorData.speciality_id) {
+          // Verificar se especialidade existe
+          const speciality = await specialityRepository.findOne({ where: { id: doctorData.speciality_id } });
+          if (!speciality) {
+            throw new Error('Especialidade não encontrada');
+          }
+          doctorUpdateData.speciality_id = doctorData.speciality_id;
+        }
         if (doctorData.professional_statement) doctorUpdateData.professional_statement = doctorData.professional_statement;
         if (doctorData.consultation_duration) doctorUpdateData.consultation_duration = doctorData.consultation_duration;
 
@@ -262,4 +277,4 @@ export class DoctorService {
       throw error;
     }
   }
-} 
+}

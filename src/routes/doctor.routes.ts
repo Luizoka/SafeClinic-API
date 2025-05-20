@@ -26,4 +26,4 @@ doctorRouter.post('/', authorize([UserRole.RECEPTIONIST]), validate(doctorSchema
 doctorRouter.put('/:id', authorize([UserRole.DOCTOR, UserRole.RECEPTIONIST]), validate(doctorSchema.update), doctorController.update);
 doctorRouter.delete('/:id', authorize([UserRole.RECEPTIONIST]), doctorController.deactivate);
 
-export default doctorRouter; 
+export default doctorRouter;

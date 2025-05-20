@@ -173,7 +173,7 @@ export class DoctorController {
    *               - password
    *               - cpf
    *               - crm
-   *               - speciality
+   *               - speciality_id
    *             properties:
    *               name:
    *                 type: string
@@ -189,8 +189,10 @@ export class DoctorController {
    *                 type: string
    *               crm:
    *                 type: string
-   *               speciality:
+   *               speciality_id:
    *                 type: string
+   *                 format: uuid
+   *                 description: ID da especialidade (UUID)
    *               professional_statement:
    *                 type: string
    *               consultation_duration:
@@ -218,11 +220,11 @@ export class DoctorController {
       }
 
       // Validação básica dos campos obrigatórios
-      const { name, email, password, cpf, crm, speciality } = req.body;
+      const { name, email, password, cpf, crm, speciality_id } = req.body;
       
-      if (!name || !email || !password || !cpf || !crm || !speciality) {
+      if (!name || !email || !password || !cpf || !crm || !speciality_id) {
         return res.status(400).json({ 
-          message: 'Campos obrigatórios: nome, email, senha, CPF, CRM e especialidade' 
+          message: 'Campos obrigatórios: nome, email, senha, CPF, CRM e speciality_id' 
         });
       }
 
@@ -265,8 +267,10 @@ export class DoctorController {
    *                 type: string
    *               phone:
    *                 type: string
-   *               speciality:
+   *               speciality_id:
    *                 type: string
+   *                 format: uuid
+   *                 description: ID da especialidade (UUID)
    *               professional_statement:
    *                 type: string
    *               consultation_duration:
@@ -375,4 +379,4 @@ export class DoctorController {
       return false;
     }
   }
-} 
+}

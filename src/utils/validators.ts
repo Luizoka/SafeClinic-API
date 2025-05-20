@@ -115,8 +115,8 @@ export const doctorSchema = {
       'string.empty': 'CRM não pode ser vazio',
       'any.required': 'CRM é obrigatório'
     }),
-    speciality: Joi.string().required().messages({
-      'string.empty': 'Especialidade não pode ser vazia',
+    speciality_id: Joi.string().uuid().required().messages({
+      'string.guid': 'Especialidade deve ser um UUID válido',
       'any.required': 'Especialidade é obrigatória'
     }),
     professional_statement: Joi.string().allow('', null),
@@ -135,7 +135,7 @@ export const doctorSchema = {
       'string.max': 'Nome deve ter no máximo 255 caracteres'
     }),
     phone: Joi.string().allow('', null),
-    speciality: Joi.string(),
+    speciality_id: Joi.string().uuid(),
     professional_statement: Joi.string().allow('', null),
     consultation_duration: Joi.number().integer().min(10).max(120).messages({
       'number.base': 'Duração da consulta deve ser um número',
@@ -264,4 +264,4 @@ export const receptionistSchema = {
       'any.required': 'Turno de trabalho é obrigatório'
     })
   })
-}; 
+};

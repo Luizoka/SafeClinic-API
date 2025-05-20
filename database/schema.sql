@@ -25,8 +25,7 @@ CREATE TABLE users (
 
 -- Tabela de Pacientes
 CREATE TABLE patients (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     birth_date DATE NOT NULL,
     health_insurance VARCHAR(255),
     emergency_contact VARCHAR(255),
@@ -36,12 +35,17 @@ CREATE TABLE patients (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tabela de Especialidades
+CREATE TABLE specialities (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
 -- Tabela de Médicos
 CREATE TABLE doctors (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     crm VARCHAR(20) UNIQUE NOT NULL,
-    speciality VARCHAR(100) NOT NULL,
+    speciality_id UUID REFERENCES specialities(id) NOT NULL,
     professional_statement TEXT,
     consultation_duration INTEGER DEFAULT 30, -- em minutos
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -50,9 +54,23 @@ CREATE TABLE doctors (
 
 -- Tabela de Recepcionistas
 CREATE TABLE receptionists (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     work_shift work_shift NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Consultas
+CREATE TABLE appointments (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    patient_id UUID REFERENCES patients(user_id) ON DELETE CASCADE,
+    doctor_id UUID REFERENCES doctors(user_id) ON DELETE CASCADE,
+    appointment_datetime TIMESTAMP NOT NULL,
+    status appointment_status DEFAULT 'scheduled',
+    type appointment_type NOT NULL,
+    symptoms_description TEXT,
+    medical_notes TEXT,
+    cancellation_reason TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -60,7 +78,7 @@ CREATE TABLE receptionists (
 -- Tabela de Horários dos Médicos
 CREATE TABLE doctor_schedules (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    doctor_id UUID REFERENCES doctors(id) ON DELETE CASCADE,
+    doctor_id UUID REFERENCES doctors(user_id) ON DELETE CASCADE,
     day_of_week INTEGER NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
@@ -73,28 +91,13 @@ CREATE TABLE doctor_schedules (
 -- Tabela de Bloqueios de Horário
 CREATE TABLE blocked_times (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    doctor_id UUID REFERENCES doctors(id) ON DELETE CASCADE,
+    doctor_id UUID REFERENCES doctors(user_id) ON DELETE CASCADE,
     start_datetime TIMESTAMP NOT NULL,
     end_datetime TIMESTAMP NOT NULL,
     reason TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT valid_datetime_range CHECK (start_datetime < end_datetime)
-);
-
--- Tabela de Consultas
-CREATE TABLE appointments (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
-    doctor_id UUID REFERENCES doctors(id) ON DELETE CASCADE,
-    appointment_datetime TIMESTAMP NOT NULL,
-    status appointment_status DEFAULT 'scheduled',
-    type appointment_type NOT NULL,
-    symptoms_description TEXT,
-    medical_notes TEXT,
-    cancellation_reason TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Tabela de Notificações
@@ -168,4 +171,5 @@ COMMENT ON TABLE receptionists IS 'Informações específicas dos recepcionistas
 COMMENT ON TABLE doctor_schedules IS 'Horários regulares de atendimento dos médicos';
 COMMENT ON TABLE blocked_times IS 'Períodos bloqueados na agenda dos médicos';
 COMMENT ON TABLE appointments IS 'Agendamentos de consultas';
-COMMENT ON TABLE notifications IS 'Notificações do sistema para os usuários'; 
+COMMENT ON TABLE notifications IS 'Notificações do sistema para os usuários';
+COMMENT ON TABLE specialities IS 'Tabela de especialidades médicas';

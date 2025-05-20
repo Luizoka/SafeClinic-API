@@ -1,13 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import { User } from './user.entity';
 import { Appointment } from './appointment.entity';
 
 @Entity('patients')
 export class Patient {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column({ type: 'uuid' })
+  @PrimaryColumn('uuid')
   user_id: string;
 
   @Column({ type: 'date' })
@@ -31,11 +28,10 @@ export class Patient {
   @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
 
-  // Relacionamentos
   @OneToOne(() => User, user => user.patient, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
   @OneToMany(() => Appointment, appointment => appointment.patient)
   appointments: Appointment[];
-} 
+}

@@ -74,7 +74,7 @@ export class ReceptionistService {
       let savedReceptionist;
       try {
         savedReceptionist = await receptionistRepository.save(receptionist);
-        logger.info('Recepcionista salvo com sucesso:', { receptionistId: savedReceptionist.id });
+        logger.info('Recepcionista salvo com sucesso:', { receptionistId: savedReceptionist.user_id });
       } catch (error) {
         logger.error('Erro ao salvar recepcionista:', { error });
         // Se falhar ao salvar o recepcionista, precisamos remover o usuário criado
@@ -87,7 +87,7 @@ export class ReceptionistService {
       return {
         ...userWithoutPassword,
         receptionist: {
-          id: savedReceptionist.id,
+          id: savedReceptionist.user_id,
           work_shift: savedReceptionist.work_shift
         }
       };
@@ -155,7 +155,7 @@ export class ReceptionistService {
       let savedReceptionist;
       try {
         savedReceptionist = await receptionistRepository.save(receptionist);
-        logger.info('Recepcionista salvo com sucesso:', { receptionistId: savedReceptionist.id });
+        logger.info('Recepcionista salvo com sucesso:', { receptionistId: savedReceptionist.user_id });
       } catch (error) {
         logger.error('Erro ao salvar recepcionista:', { error });
         // Se falhar ao salvar o recepcionista, precisamos remover o usuário criado
@@ -168,7 +168,7 @@ export class ReceptionistService {
       return {
         ...userWithoutPassword,
         receptionist: {
-          id: savedReceptionist.id,
+          id: savedReceptionist.user_id,
           work_shift: savedReceptionist.work_shift
         }
       };
@@ -181,10 +181,10 @@ export class ReceptionistService {
     }
   }
 
-  async findById(id: string) {
+  async findById(user_id: string) {
     try {
       const receptionist = await receptionistRepository.findOne({
-        where: { id },
+        where: { user_id },
         relations: ['user']
       });
 
@@ -197,7 +197,7 @@ export class ReceptionistService {
       return {
         ...userWithoutPassword,
         receptionist: {
-          id: receptionist.id,
+          user_id: receptionist.user_id,
           work_shift: receptionist.work_shift
         }
       };
@@ -205,7 +205,7 @@ export class ReceptionistService {
       logger.error('Erro ao buscar recepcionista:', { 
         error: error instanceof Error ? error.message : error,
         stack: error instanceof Error ? error.stack : undefined,
-        id 
+        user_id
       });
       throw error;
     }
@@ -226,7 +226,7 @@ export class ReceptionistService {
         return {
           ...userWithoutPassword,
           receptionist: {
-            id: r.id,
+            user_id: r.user_id,
             work_shift: r.work_shift
           }
         };

@@ -59,4 +59,4 @@ export class User {
 
   @OneToOne(() => Receptionist, receptionist => receptionist.user)
   receptionist: Receptionist;
-} 
+}

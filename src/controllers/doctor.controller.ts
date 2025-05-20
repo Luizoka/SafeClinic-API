@@ -131,7 +131,7 @@ export class DoctorController {
   async findById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      
+
       // Validar acesso: próprio médico ou acesso permitido
       if (
         req.user?.role === UserRole.DOCTOR && 

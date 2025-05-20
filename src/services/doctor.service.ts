@@ -11,15 +11,15 @@ const specialityRepository = AppDataSource.getRepository(Speciality);
 
 export class DoctorService {
   // Buscar médico por ID
-  async findById(id: string): Promise<Doctor | null> {
+  async findById(user_id: string): Promise<Doctor | null> {
     try {
       const doctor = await doctorRepository.findOne({
-        where: { id: id },
+        where: { user_id },
         relations: ['user']
       });
       return doctor;
     } catch (error) {
-      logger.error('Erro ao buscar médico por ID:', { error, doctorId: id });
+      logger.error('Erro ao buscar médico por ID:', { error, user_id });
       throw new Error('Falha ao buscar médico');
     }
   }
@@ -155,7 +155,7 @@ export class DoctorService {
 
         // Log de auditoria
         auditLog('DOCTOR_CREATED', savedUser.id, {
-          doctorId: savedDoctor.id
+          doctorId: savedDoctor.user_id
         });
 
         return savedDoctor;
@@ -174,13 +174,13 @@ export class DoctorService {
   }
 
   // Atualizar médico
-  async update(id: string, doctorData: {
+  async update(user_id: string, doctorData: {
     name?: string;
     phone?: string;
     speciality_id?: string;
     professional_statement?: string;
     consultation_duration?: number;
-  }, userId: string): Promise<Doctor> {
+  }, updatedBy: string): Promise<Doctor> {
     try {
       const queryRunner = AppDataSource.createQueryRunner();
       await queryRunner.connect();
@@ -189,7 +189,7 @@ export class DoctorService {
       try {
         // Buscar médico
         const doctor = await queryRunner.manager.findOne(Doctor, {
-          where: { id },
+          where: { user_id },
           relations: ['user']
         });
 
@@ -221,11 +221,11 @@ export class DoctorService {
         if (doctorData.professional_statement) doctorUpdateData.professional_statement = doctorData.professional_statement;
         if (doctorData.consultation_duration) doctorUpdateData.consultation_duration = doctorData.consultation_duration;
 
-        await queryRunner.manager.update(Doctor, id, doctorUpdateData);
+        await queryRunner.manager.update(Doctor, user_id, doctorUpdateData);
 
         // Buscar médico atualizado
         const updatedDoctor = await queryRunner.manager.findOne(Doctor, {
-          where: { id },
+          where: { user_id },
           relations: ['user']
         });
 
@@ -233,8 +233,8 @@ export class DoctorService {
         await queryRunner.commitTransaction();
 
         // Log de auditoria
-        auditLog('DOCTOR_UPDATED', userId, {
-          doctorId: id,
+        auditLog('DOCTOR_UPDATED', updatedBy, {
+          doctorId: user_id,
           updatedFields: Object.keys({ ...doctorData })
         });
 
@@ -248,16 +248,16 @@ export class DoctorService {
         await queryRunner.release();
       }
     } catch (error) {
-      logger.error('Erro ao atualizar médico:', { error, doctorId: id });
+      logger.error('Erro ao atualizar médico:', { error, doctorId: user_id });
       throw error;
     }
   }
 
   // Desativar médico
-  async deactivate(id: string, userId: string): Promise<void> {
+  async deactivate(user_id: string, updatedBy: string): Promise<void> {
     try {
       const doctor = await doctorRepository.findOne({
-        where: { id },
+        where: { user_id },
         relations: ['user']
       });
 
@@ -269,11 +269,11 @@ export class DoctorService {
       await userRepository.update(doctor.user_id, { status: false });
 
       // Log de auditoria
-      auditLog('DOCTOR_DEACTIVATED', userId, {
-        doctorId: id
+      auditLog('DOCTOR_DEACTIVATED', updatedBy, {
+        doctorId: user_id
       });
     } catch (error) {
-      logger.error('Erro ao desativar médico:', { error, doctorId: id });
+      logger.error('Erro ao desativar médico:', { error, doctorId: user_id });
       throw error;
     }
   }

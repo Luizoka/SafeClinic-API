@@ -197,7 +197,7 @@ export class ReceptionistController {
    *         required: true
    *         schema:
    *           type: string
-   *         description: ID do recepcionista
+   *         description: ID do recepcionista (user_id)
    *     responses:
    *       200:
    *         description: Dados do recepcionista

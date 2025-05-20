@@ -1,1 +1,0 @@
--- Arquivo de migration vazio. As alterações de especialidade já foram aplicadas diretamente no banco.

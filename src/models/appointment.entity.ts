@@ -58,10 +58,10 @@ export class Appointment {
 
   // Relacionamentos
   @ManyToOne(() => Patient, patient => patient.appointments)
-  @JoinColumn({ name: 'patient_id' })
+  @JoinColumn({ name: 'patient_id', referencedColumnName: 'user_id' })
   patient: Patient;
 
   @ManyToOne(() => Doctor, doctor => doctor.appointments)
-  @JoinColumn({ name: 'doctor_id' })
+  @JoinColumn({ name: 'doctor_id', referencedColumnName: 'user_id' })
   doctor: Doctor;
-} 
+}

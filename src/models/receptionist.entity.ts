@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
 
 export enum WorkShift {
@@ -9,7 +9,7 @@ export enum WorkShift {
 
 @Entity('receptionists')
 export class Receptionist {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   user_id: string;
 
   @Column({ type: 'enum', enum: WorkShift })

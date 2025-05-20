@@ -37,13 +37,52 @@ export class AppointmentController {
    */
   async findAll(req: Request, res: Response) {
     try {
-      // Placeholder - implementar serviço de consultas
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const skip = (page - 1) * limit;
+
+      const appointmentRepo = AppDataSource.getRepository(Appointment);
+
+      const [appointments, total] = await appointmentRepo.findAndCount({
+        relations: [
+          'doctor',
+          'doctor.user',
+          'doctor.speciality',
+          'patient',
+          'patient.user'
+        ],
+        skip,
+        take: limit,
+        order: { appointment_datetime: 'DESC' }
+      });
+
+      // Retornar apenas informações essenciais
+      const data = appointments.map(appt => ({
+        id: appt.id,
+        appointment_datetime: appt.appointment_datetime,
+        status: appt.status,
+        type: appt.type,
+        symptoms_description: appt.symptoms_description,
+        medical_notes: appt.medical_notes,
+        cancellation_reason: appt.cancellation_reason,
+        doctor: {
+          user_id: appt.doctor?.user_id,
+          name: appt.doctor?.user?.name,
+          speciality: appt.doctor?.speciality?.name
+        },
+        patient: {
+          user_id: appt.patient?.user_id,
+          name: appt.patient?.user?.name
+        }
+      }));
+
       return res.json({
-        data: [],
+        data,
         metadata: {
-          total: 0,
-          page: 1,
-          limit: 10
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
         }
       });
     } catch (error) {

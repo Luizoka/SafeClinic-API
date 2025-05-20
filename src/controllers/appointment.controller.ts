@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import logger from '../utils/logger';
-import { UserRole } from '../models/user.entity';
+import { AppDataSource } from '../database/data-source';
+import { Appointment } from '../models/appointment.entity';
+import { Doctor } from '../models/doctor.entity';
+import { Patient } from '../models/patient.entity';
 
 export class AppointmentController {
   /**
@@ -130,11 +133,46 @@ export class AppointmentController {
    */
   async create(req: Request, res: Response) {
     try {
-      // Placeholder - implementar serviço de consultas
-      return res.status(501).json({ message: 'Funcionalidade ainda não implementada' });
+      const { doctor_id, patient_id, date, time, notes } = req.body;
+
+      // Validação básica
+      if (!doctor_id || !patient_id || !date || !time) {
+        return res.status(400).json({ message: 'Campos obrigatórios: doctor_id, patient_id, date, time' });
+      }
+
+      // Verifique se o médico existe
+      const doctorRepo = AppDataSource.getRepository(Doctor);
+      const doctor = await doctorRepo.findOne({ where: { user_id: doctor_id } });
+      if (!doctor) {
+        return res.status(404).json({ message: 'Médico não encontrado' });
+      }
+
+      // Verifique se o paciente existe
+      const patientRepo = AppDataSource.getRepository(Patient);
+      const patient = await patientRepo.findOne({ where: { user_id: patient_id } });
+      if (!patient) {
+        return res.status(404).json({ message: 'Paciente não encontrado' });
+      }
+
+      // Montar datetime da consulta
+      const appointment_datetime = new Date(`${date}T${time}:00`);
+
+      // Criar consulta
+      const appointmentRepo = AppDataSource.getRepository(Appointment);
+      const newAppointment = appointmentRepo.create({
+        doctor: doctor,
+        patient: patient,
+        appointment_datetime,
+        type: 'presential' as any, // Use the correct AppointmentType value or import the enum and use AppointmentType.PRESENTIAL
+        symptoms_description: notes || null
+      });
+
+      const savedAppointment = await appointmentRepo.save(newAppointment);
+
+      return res.status(201).json(savedAppointment);
     } catch (error) {
       logger.error('Erro ao agendar consulta:', { error });
       return res.status(500).json({ message: 'Erro ao agendar consulta' });
     }
   }
-} 
+}

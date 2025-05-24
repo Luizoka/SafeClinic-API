@@ -29,6 +29,6 @@ export class DoctorSchedule {
 
   // Relacionamentos
   @ManyToOne(() => Doctor, doctor => doctor.schedules)
-  @JoinColumn({ name: 'doctor_id' })
+  @JoinColumn({ name: 'doctor_id', referencedColumnName: 'user_id' })
   doctor: Doctor;
-} 
+}

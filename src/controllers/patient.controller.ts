@@ -73,7 +73,7 @@ export class PatientController {
    *         required: true
    *         schema:
    *           type: string
-   *         description: ID do paciente
+   *         description: ID do paciente (user_id)
    *     responses:
    *       200:
    *         description: Dados do paciente
@@ -209,7 +209,7 @@ export class PatientController {
    *         required: true
    *         schema:
    *           type: string
-   *         description: ID do paciente
+   *         description: ID do paciente (user_id)
    *     requestBody:
    *       required: true
    *       content:
@@ -296,7 +296,7 @@ export class PatientController {
    *         required: true
    *         schema:
    *           type: string
-   *         description: ID do paciente
+   *         description: ID do paciente (user_id)
    *     responses:
    *       200:
    *         description: Paciente desativado com sucesso

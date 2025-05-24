@@ -18,6 +18,7 @@ import receptionistRouter from './routes/receptionist.routes';
 import appointmentRouter from './routes/appointment.routes';
 import scheduleRouter from './routes/schedule.routes';
 import notificationRouter from './routes/notification.routes';
+import specialityRouter from './routes/speciality.routes';
 
 // Configuração das variáveis de ambiente
 dotenv.config();
@@ -59,6 +60,7 @@ app.use(`${apiPrefix}/receptionists`, receptionistRouter);
 app.use(`${apiPrefix}/appointments`, appointmentRouter);
 app.use(`${apiPrefix}/schedules`, scheduleRouter);
 app.use(`${apiPrefix}/notifications`, notificationRouter);
+app.use(`${apiPrefix}/specialities`, specialityRouter);
 
 // Middleware para tratar erros 404
 app.use((req, res) => {

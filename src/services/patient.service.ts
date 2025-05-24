@@ -9,15 +9,15 @@ const userRepository = AppDataSource.getRepository(User);
 
 export class PatientService {
   // Buscar paciente por ID
-  async findById(id: string): Promise<Patient | null> {
+  async findById(user_id: string): Promise<Patient | null> {
     try {
       const patient = await patientRepository.findOne({
-        where: { id },
+        where: { user_id },
         relations: ['user']
       });
       return patient;
     } catch (error) {
-      logger.error('Erro ao buscar paciente por ID:', { error, patientId: id });
+      logger.error('Erro ao buscar paciente por ID:', { error, user_id });
       throw new Error('Falha ao buscar paciente');
     }
   }
@@ -116,7 +116,7 @@ export class PatientService {
 
         // Log de auditoria
         auditLog('PATIENT_CREATED', savedUser.id, {
-          patientId: savedPatient.id
+          patientId: savedPatient.user_id
         });
 
         return savedPatient;
@@ -135,7 +135,7 @@ export class PatientService {
   }
 
   // Atualizar paciente
-  async update(id: string, patientData: {
+  async update(user_id: string, patientData: {
     name?: string;
     phone?: string;
     birth_date?: Date;
@@ -143,7 +143,7 @@ export class PatientService {
     emergency_contact?: string;
     blood_type?: string;
     allergies?: string;
-  }, userId: string): Promise<Patient> {
+  }, updatedBy: string): Promise<Patient> {
     try {
       const queryRunner = AppDataSource.createQueryRunner();
       await queryRunner.connect();
@@ -152,7 +152,7 @@ export class PatientService {
       try {
         // Buscar paciente
         const patient = await queryRunner.manager.findOne(Patient, {
-          where: { id },
+          where: { user_id },
           relations: ['user']
         });
 
@@ -179,11 +179,11 @@ export class PatientService {
         if (patientData.blood_type) patientUpdateData.blood_type = patientData.blood_type;
         if (patientData.allergies) patientUpdateData.allergies = patientData.allergies;
 
-        await queryRunner.manager.update(Patient, id, patientUpdateData);
+        await queryRunner.manager.update(Patient, user_id, patientUpdateData);
 
         // Buscar paciente atualizado
         const updatedPatient = await queryRunner.manager.findOne(Patient, {
-          where: { id },
+          where: { user_id },
           relations: ['user']
         });
 
@@ -191,8 +191,8 @@ export class PatientService {
         await queryRunner.commitTransaction();
 
         // Log de auditoria
-        auditLog('PATIENT_UPDATED', userId, {
-          patientId: id,
+        auditLog('PATIENT_UPDATED', updatedBy, {
+          patientId: user_id,
           updatedFields: Object.keys({ ...patientData })
         });
 
@@ -206,32 +206,23 @@ export class PatientService {
         await queryRunner.release();
       }
     } catch (error) {
-      logger.error('Erro ao atualizar paciente:', { error, patientId: id });
+      logger.error('Erro ao atualizar paciente:', { error, patientId: user_id });
       throw error;
     }
   }
 
   // Desativar paciente
-  async deactivate(id: string, userId: string): Promise<void> {
+  async deactivate(user_id: string, updatedBy: string): Promise<void> {
     try {
       const patient = await patientRepository.findOne({
-        where: { id },
+        where: { user_id },
         relations: ['user']
       });
-
-      if (!patient) {
-        throw new Error('Paciente não encontrado');
-      }
-
-      // Desativar usuário
+      if (!patient) throw new Error('Paciente não encontrado');
       await userRepository.update(patient.user_id, { status: false });
-
-      // Log de auditoria
-      auditLog('PATIENT_DEACTIVATED', userId, {
-        patientId: id
-      });
+      auditLog('PATIENT_DEACTIVATED', updatedBy, { patientId: user_id });
     } catch (error) {
-      logger.error('Erro ao desativar paciente:', { error, patientId: id });
+      logger.error('Erro ao desativar paciente:', { error, user_id });
       throw error;
     }
   }

@@ -68,6 +68,10 @@ const options: swaggerJSDoc.Options = {
       {
         name: 'Notifications',
         description: 'Gestão de notificações'
+      },
+      {
+        name: 'Specialities',
+        description: 'CRUD de especialidades médicas'
       }
     ]
   },
@@ -80,4 +84,4 @@ const options: swaggerJSDoc.Options = {
 
 const swaggerSpec = swaggerJSDoc(options);
 
-export default swaggerSpec; 
+export default swaggerSpec;

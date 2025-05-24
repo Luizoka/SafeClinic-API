@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { authenticate } from '../middlewares/auth.middleware';
+import { NotificationController } from '../controllers/notification.controller';
 
 const notificationRouter = Router();
+const notificationController = new NotificationController();
 
 /**
  * @swagger
@@ -42,10 +44,7 @@ notificationRouter.use(authenticate);
  *       500:
  *         description: Erro no servidor
  */
-notificationRouter.get('/', async (req, res) => {
-  // Implementação pendente
-  res.status(501).json({ message: 'Funcionalidade ainda não implementada' });
-});
+notificationRouter.get('/', notificationController.findAll);
 
 /**
  * @swagger
@@ -72,10 +71,7 @@ notificationRouter.get('/', async (req, res) => {
  *       500:
  *         description: Erro no servidor
  */
-notificationRouter.patch('/:id/read', async (req, res) => {
-  // Implementação pendente
-  res.status(501).json({ message: 'Funcionalidade ainda não implementada' });
-});
+notificationRouter.patch('/:id/read', notificationController.markAsRead);
 
 /**
  * @swagger
@@ -93,9 +89,6 @@ notificationRouter.patch('/:id/read', async (req, res) => {
  *       500:
  *         description: Erro no servidor
  */
-notificationRouter.patch('/read-all', async (req, res) => {
-  // Implementação pendente
-  res.status(501).json({ message: 'Funcionalidade ainda não implementada' });
-});
+notificationRouter.patch('/read-all', notificationController.markAllAsRead);
 
 export default notificationRouter; 

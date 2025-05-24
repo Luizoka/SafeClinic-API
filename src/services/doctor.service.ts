@@ -11,13 +11,39 @@ export class DoctorService {
   // Buscar médico por ID
   async findById(id: string): Promise<Doctor | null> {
     try {
+      logger.info('Iniciando busca de médico por ID:', { id });
+
+      // Primeiro, verificar se o usuário existe
+      const user = await userRepository.findOne({
+        where: { id }
+      });
+
+      if (!user) {
+        logger.info('Usuário não encontrado:', { id });
+        return null;
+      }
+
+      logger.info('Usuário encontrado, buscando médico associado:', { userId: id });
+
+      // Depois, buscar o médico associado ao usuário
       const doctor = await doctorRepository.findOne({
-        where: { id },
+        where: { user_id: id },
         relations: ['user']
       });
+
+      if (!doctor) {
+        logger.info('Médico não encontrado para o usuário:', { userId: id });
+        return null;
+      }
+
+      logger.info('Médico encontrado com sucesso:', { doctorId: doctor.id });
       return doctor;
     } catch (error) {
-      logger.error('Erro ao buscar médico por ID:', { error, doctorId: id });
+      logger.error('Erro ao buscar médico:', { 
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        doctorId: id 
+      });
       throw new Error('Falha ao buscar médico');
     }
   }

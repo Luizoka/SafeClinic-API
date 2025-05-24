@@ -6,6 +6,11 @@ import path from 'path';
 import { User } from '../models/user.entity';
 import { Receptionist } from '../models/receptionist.entity';
 import { Doctor } from '../models/doctor.entity';
+import { Patient } from '../models/patient.entity';
+import { Appointment } from '../models/appointment.entity';
+import { BlockedTime } from '../models/blocked-time.entity';
+import { DoctorSchedule } from '../models/doctor-schedule.entity';
+import { Notification } from '../models/notification.entity';
 
 dotenv.config();
 
@@ -27,9 +32,13 @@ const getDataSourceConfig = () => {
         User,
         Receptionist,
         Doctor,
-        path.resolve(__dirname, '../models/**/*.entity.{ts,js}')
+        Patient,
+        Appointment,
+        BlockedTime,
+        DoctorSchedule,
+        Notification
       ],
-      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      migrations: [path.resolve(__dirname, './migrations/**/*.{ts,js}')],
       subscribers: [__dirname + '/subscribers/*{.ts,.js}']
     };
   }
@@ -50,9 +59,13 @@ const getDataSourceConfig = () => {
       User,
       Receptionist,
       Doctor,
-      path.resolve(__dirname, '../models/**/*.entity.{ts,js}')
+      Patient,
+      Appointment,
+      BlockedTime,
+      DoctorSchedule,
+      Notification
     ],
-    migrations: [__dirname + '/migrations/*{.ts,.js}'],
+    migrations: [path.resolve(__dirname, './migrations/**/*.{ts,js}')],
     subscribers: [__dirname + '/subscribers/*{.ts,.js}']
   };
 };
@@ -65,6 +78,17 @@ export const initializeDB = async (): Promise<void> => {
     logger.info('Iniciando conexão com o banco de dados...');
     await AppDataSource.initialize();
     logger.info('Conexão com o banco de dados estabelecida com sucesso!');
+    
+    // Executa migrações, se houver pendentes
+    logger.info('Verificando migrações pendentes...');
+    const pendingMigrations = await AppDataSource.showMigrations();
+    if (pendingMigrations) {
+      logger.info('Executando migrações pendentes...');
+      await AppDataSource.runMigrations();
+      logger.info('Migrações executadas com sucesso!');
+    } else {
+      logger.info('Não há migrações pendentes.');
+    }
   } catch (error) {
     logger.error('Erro ao inicializar conexão com o banco de dados:', { error });
     throw error;

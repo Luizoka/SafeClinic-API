@@ -39,8 +39,12 @@ export class PatientController {
    */
   async findAll(req: Request, res: Response) {
     try {
-      // Apenas médicos e recepcionistas podem ver a lista completa
-      if (req.user?.role !== UserRole.DOCTOR && req.user?.role !== UserRole.RECEPTIONIST) {
+      // Aceita tanto minúsculo quanto maiúsculo
+      const role = req.user?.role;
+      if (
+        !role ||
+        (role.toString().toLowerCase() !== 'doctor' && role.toString().toLowerCase() !== 'receptionist')
+      ) {
         return res.status(403).json({ message: 'Acesso negado' });
       }
 
@@ -336,4 +340,4 @@ export class PatientController {
       return false;
     }
   }
-} 
+}

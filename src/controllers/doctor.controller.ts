@@ -131,24 +131,29 @@ export class DoctorController {
   async findById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      
-      // Validar acesso: próprio médico ou acesso permitido
-      if (
-        req.user?.role === UserRole.DOCTOR && 
-        !(await this.isOwnDoctorProfile(req.user.id, id))
-      ) {
-        return res.status(403).json({ message: 'Acesso negado' });
-      }
+      logger.info('Requisição para buscar médico:', { id });
 
       const doctor = await doctorService.findById(id);
       
       if (!doctor) {
+        logger.info('Médico não encontrado:', { id });
         return res.status(404).json({ message: 'Médico não encontrado' });
       }
 
+      // Validar acesso: próprio médico ou acesso permitido
+      if (req.user?.role === UserRole.DOCTOR && doctor.user_id !== req.user.id) {
+        logger.warn('Tentativa de acesso não autorizado:', { userId: req.user?.id, doctorId: id });
+        return res.status(403).json({ message: 'Acesso negado' });
+      }
+
+      logger.info('Médico encontrado com sucesso:', { doctorId: doctor.id });
       return res.json(doctor);
     } catch (error) {
-      logger.error('Erro ao buscar médico:', { error, doctorId: req.params.id });
+      logger.error('Erro ao buscar médico:', { 
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        doctorId: req.params.id 
+      });
       return res.status(500).json({ message: 'Erro ao buscar médico' });
     }
   }
@@ -290,12 +295,12 @@ export class DoctorController {
       const { id } = req.params;
       
       // Validar acesso: próprio médico ou recepcionista
-      if (
-        req.user?.role === UserRole.DOCTOR && 
-        !(await this.isOwnDoctorProfile(req.user.id, id))
-      ) {
-        return res.status(403).json({ message: 'Acesso negado' });
-      } else if (req.user?.role !== UserRole.DOCTOR && req.user?.role !== UserRole.RECEPTIONIST) {
+      if (req.user?.role === UserRole.DOCTOR) {
+        const doctor = await doctorService.findById(id);
+        if (doctor?.user_id !== req.user.id) {
+          return res.status(403).json({ message: 'Acesso negado' });
+        }
+      } else if (req.user?.role !== UserRole.RECEPTIONIST) {
         return res.status(403).json({ message: 'Acesso negado' });
       }
 
@@ -363,16 +368,6 @@ export class DoctorController {
       }
       
       return res.status(500).json({ message: 'Erro ao desativar médico' });
-    }
-  }
-
-  // Método auxiliar para verificar se é o próprio perfil do médico
-  private async isOwnDoctorProfile(userId: string, doctorId: string): Promise<boolean> {
-    try {
-      const doctor = await doctorService.findById(doctorId);
-      return doctor?.user_id === userId;
-    } catch (error) {
-      return false;
     }
   }
 } 

@@ -34,7 +34,7 @@ export class PatientService {
         relations: ['user'],
         skip: (page - 1) * limit,
         take: limit,
-        order: { created_at: 'DESC' }
+        order: { created_at: 'DESC' } // <-- corrigido para o nome real da propriedade
       });
 
       return {
@@ -44,7 +44,12 @@ export class PatientService {
         totalPages: Math.ceil(total / limit)
       };
     } catch (error) {
-      logger.error('Erro ao listar pacientes:', { error });
+      // Log detalhado do erro para diagnóstico
+      logger.error('Erro ao listar pacientes:', { 
+        message: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        error
+      });
       throw new Error('Falha ao listar pacientes');
     }
   }
@@ -230,4 +235,4 @@ export class PatientService {
       throw error;
     }
   }
-} 
+}

@@ -11,23 +11,19 @@ import { Appointment } from '../models/appointment.entity';
 import { BlockedTime } from '../models/blocked-time.entity';
 import { DoctorSchedule } from '../models/doctor-schedule.entity';
 import { Notification } from '../models/notification.entity';
+import { Speciality } from '../models/speciality.entity';
 
 dotenv.config();
 
-// Configuração para permitir tanto DATABASE_URL quanto configurações individuais
 const getDataSourceConfig = () => {
-  // Se DATABASE_URL estiver definido (para Railway)
   if (process.env.DATABASE_URL) {
     logger.info('Usando DATABASE_URL para conexão');
     return {
       type: 'postgres',
       url: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: false
-      },
+      ssl: { rejectUnauthorized: false },
       synchronize: process.env.DB_SYNC === 'true',
-      // Mostra apenas erros do TypeORM
-      logging: 'error',
+      logging: process.env.DB_LOGGING === 'true' ? 'all' : 'error',
       entities: [
         User,
         Receptionist,
@@ -36,14 +32,14 @@ const getDataSourceConfig = () => {
         Appointment,
         BlockedTime,
         DoctorSchedule,
-        Notification
+        Notification,
+        Speciality
       ],
       migrations: [path.resolve(__dirname, './migrations/**/*.{ts,js}')],
       subscribers: [__dirname + '/subscribers/*{.ts,.js}']
     };
   }
 
-  // Configuração padrão para desenvolvimento local
   logger.info('Usando configuração local para conexão');
   return {
     type: 'postgres',
@@ -52,9 +48,9 @@ const getDataSourceConfig = () => {
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_DATABASE || 'safeclinic',
+    ssl: process.env.DB_HOST?.includes('rlwy.net') ? { rejectUnauthorized: false } : false,
     synchronize: process.env.DB_SYNC === 'true',
-    // Mostra apenas erros do TypeORM
-    logging: 'error',
+    logging: process.env.DB_LOGGING === 'true' ? 'all' : 'error',
     entities: [
       User,
       Receptionist,
@@ -63,7 +59,8 @@ const getDataSourceConfig = () => {
       Appointment,
       BlockedTime,
       DoctorSchedule,
-      Notification
+      Notification,
+      Speciality
     ],
     migrations: [path.resolve(__dirname, './migrations/**/*.{ts,js}')],
     subscribers: [__dirname + '/subscribers/*{.ts,.js}']
@@ -72,14 +69,11 @@ const getDataSourceConfig = () => {
 
 export const AppDataSource = new DataSource(getDataSourceConfig() as any);
 
-// Função para inicializar a conexão com o banco de dados
 export const initializeDB = async (): Promise<void> => {
   try {
     logger.info('Iniciando conexão com o banco de dados...');
     await AppDataSource.initialize();
     logger.info('Conexão com o banco de dados estabelecida com sucesso!');
-    
-    // Executa migrações, se houver pendentes
     logger.info('Verificando migrações pendentes...');
     const pendingMigrations = await AppDataSource.showMigrations();
     if (pendingMigrations) {
@@ -90,7 +84,10 @@ export const initializeDB = async (): Promise<void> => {
       logger.info('Não há migrações pendentes.');
     }
   } catch (error) {
-    logger.error('Erro ao inicializar conexão com o banco de dados:', { error });
+    logger.error('Erro ao inicializar conexão com o banco de dados:', { 
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined
+    });
     throw error;
   }
 };

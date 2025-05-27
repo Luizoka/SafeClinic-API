@@ -146,7 +146,7 @@ export class DoctorController {
         return res.status(403).json({ message: 'Acesso negado' });
       }
 
-      logger.info('Médico encontrado com sucesso:', { doctorId: doctor.id });
+      logger.info('Médico encontrado com sucesso:', { doctorId: doctor.user_id });
       return res.json(doctor);
     } catch (error) {
       logger.error('Erro ao buscar médico:', { 

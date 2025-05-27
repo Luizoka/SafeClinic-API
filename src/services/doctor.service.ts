@@ -36,7 +36,8 @@ export class DoctorService {
         return null;
       }
 
-      logger.info('Médico encontrado com sucesso:', { doctorId: doctor.id });
+      logger.info('Médico encontrado com sucesso:', { doctorId: doctor.user_id
+       });
       return doctor;
     } catch (error) {
       logger.error('Erro ao buscar médico:', { 
@@ -85,7 +86,7 @@ export class DoctorService {
     try {
       const [doctors, total] = await doctorRepository.findAndCount({
         where: {
-          speciality: speciality
+          speciality: speciality as any
         },
         relations: ['user'],
         skip: (page - 1) * limit,
@@ -159,9 +160,9 @@ export class DoctorService {
 
         // Criar médico
         const newDoctor = queryRunner.manager.create(Doctor, {
-          user_id: savedUser.id,
+          user: savedUser,
           crm: doctorData.crm,
-          speciality: doctorData.speciality,
+          speciality: doctorData.speciality as any, // Cast if necessary, or map to enum/object
           professional_statement: doctorData.professional_statement,
           consultation_duration: doctorData.consultation_duration || 30
         });
@@ -173,7 +174,7 @@ export class DoctorService {
 
         // Log de auditoria
         auditLog('DOCTOR_CREATED', savedUser.id, {
-          doctorId: savedDoctor.id
+          doctorId: savedDoctor.user_id
         });
 
         return savedDoctor;
@@ -207,7 +208,8 @@ export class DoctorService {
       try {
         // Buscar médico
         const doctor = await queryRunner.manager.findOne(Doctor, {
-          where: { id },
+          where: { user_id: userId
+           },
           relations: ['user']
         });
 
@@ -236,7 +238,7 @@ export class DoctorService {
 
         // Buscar médico atualizado
         const updatedDoctor = await queryRunner.manager.findOne(Doctor, {
-          where: { id },
+          where: { user_id: userId },
           relations: ['user']
         });
 
@@ -268,7 +270,8 @@ export class DoctorService {
   async deactivate(id: string, userId: string): Promise<void> {
     try {
       const doctor = await doctorRepository.findOne({
-        where: { id },
+        where: { user_id:userId
+         },
         relations: ['user']
       });
 

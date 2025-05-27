@@ -22,6 +22,20 @@ O SafeClinic é uma aplicação web para otimizar o agendamento de consultas mé
 - Joi para validação de dados
 - Winston para logs
 
+## Usuários de Teste
+
+Estes usuários já estão cadastrados no banco de dados para facilitar testes:
+
+| Email                          | Papel         | Senha   |
+|---------------------------------|--------------|---------|
+| ana.costa@safeclinic.com        | Doutor       | 123456  |
+| pedro.oliveira@safeclinic.com   | Doutor       | 123456  |
+| joao.santos@safeclinic.com      | Doutor       | 123456  |
+| fernanda.lima@email.com         | Paciente     | 123456  |
+| roberto.souza@email.com         | Paciente     | 123456  |
+| carlos.ferreira@email.com       | Paciente     | 123456  |
+| recepcionista@safeclinic.com    | Recepcionista (adm) | 123456  |
+
 ## Funcionalidades Principais
 
 - Autenticação e autorização com JWT
@@ -137,4 +151,4 @@ Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para d
 ## Contato
 
 Luiz Lopes - luizgalopes01@gmail.com
-Sandra Remédios - Srocha2290@gmail.com 
+Sandra Remédios - Srocha2290@gmail.com

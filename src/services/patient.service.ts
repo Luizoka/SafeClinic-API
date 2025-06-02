@@ -11,13 +11,21 @@ export class PatientService {
   // Buscar paciente por ID
   async findById(user_id: string): Promise<Patient | null> {
     try {
+      logger.info('Buscando paciente por user_id:', { user_id });
       const patient = await patientRepository.findOne({
         where: { user_id },
         relations: ['user']
       });
+      if (!patient) {
+        logger.warn('Paciente não encontrado para user_id:', { user_id });
+      }
       return patient;
     } catch (error) {
-      logger.error('Erro ao buscar paciente por ID:', { error, user_id });
+      logger.error('Erro ao buscar paciente por ID:', { 
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        user_id
+      });
       throw new Error('Falha ao buscar paciente');
     }
   }

@@ -106,7 +106,11 @@ export class PatientController {
 
       return res.json(patient);
     } catch (error) {
-      logger.error('Erro ao buscar paciente:', { error, patientId: req.params.id });
+      logger.error('Erro ao buscar paciente:', { 
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        patientId: req.params.id 
+      });
       return res.status(500).json({ message: 'Erro ao buscar paciente' });
     }
   }

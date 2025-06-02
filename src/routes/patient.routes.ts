@@ -20,8 +20,8 @@ patientRouter.post('/', validate(patientSchema.create), patientController.create
 
 // Rotas protegidas
 patientRouter.get('/', authenticate, patientController.findAll);
-patientRouter.get('/:id', authenticate, patientController.findById);
-patientRouter.put('/:id', authenticate, validate(patientSchema.update), patientController.update);
-patientRouter.delete('/:id', authenticate, patientController.deactivate);
+patientRouter.get('/:id', authenticate, patientController.findById.bind(patientController));
+patientRouter.put('/:id', authenticate, validate(patientSchema.update), patientController.update.bind(patientController));
+patientRouter.delete('/:id', authenticate, patientController.deactivate.bind(patientController));
 
 export default patientRouter;
